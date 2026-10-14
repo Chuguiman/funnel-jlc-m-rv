@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body style="background-color:#f8fafc;color:#0f172a">
+    <!-- Header -->
+    <header class="relative z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md sm:sticky sm:top-0 sm:bg-white/90">
+      <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <a href="/" class="flex min-w-0 items-center gap-3" aria-label="JLCamejo Seguros">
+          <img src="/empresa-logo.png" alt="JLCamejo — José Luis Camejo Leal" width="1748" height="1481" class="h-10 w-auto sm:h-16" />
+          <span class="h-7 w-px shrink-0 bg-slate-200 sm:h-9" aria-hidden="true"></span>
+          <span class="flex min-w-0 flex-col">
+            <span class="hidden text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:block">Emisión y pago con</span>
+            <img src="/mercantil-logo.png" alt="Mercantil Seguros" width="752" height="215" class="h-5 w-auto max-w-24 object-contain object-left sm:mt-1 sm:h-7 sm:max-w-none" />
+          </span>
+        </a>
+        <nav class="hidden items-center gap-8 text-sm font-semibold text-slate-600 sm:flex">
+          <a href="#funnel" class="transition hover:text-brand-600">Tu cotización</a>
+        </nav>
+        <a
+          href="https://wa.me/584148071808?text=Hola%2C%20quiero%20hablar%20con%20JLC%20sobre%20mi%20seguro." target="_blank" rel="noopener noreferrer"
+          class="rounded-full bg-brand-600 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-brand-600/25 transition hover:bg-brand-700"
+        >
+          Hablar con JLC
+        </a>
+      </div>
+    </header>
+
+    <!-- Contenido -->
+    <slot />
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-slate-500 sm:flex-row">
+        <div class="flex items-center gap-2">
+          <span class="font-display font-extrabold text-slate-900">
+            JL<span class="text-brand-600">Camejo</span>
+          </span>
+          <span>· CAA-002563 · RIF V-10387044-1</span>
+        </div>
+        <p class="text-center">
+          Pólizas emitidas y pago procesado por <span class="font-semibold text-slate-700">Mercantil Seguros</span>.
+          © {new Date().getFullYear()} JLCamejo.
+        </p>
+        <p>
+          <a href="mailto:seguros@jlcamejo.com" class="transition hover:text-brand-600">
+            seguros@jlcamejo.com
+          </a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+
+
