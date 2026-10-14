@@ -28,9 +28,9 @@ en el servidor: el navegador nunca la ve.
 ## Configuración local
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env   # y completa la API key
-npm run dev            # http://localhost:4321
+pnpm dev               # http://localhost:4321
 ```
 
 Variables (`src/env.d.ts`):
@@ -47,7 +47,7 @@ Variables (`src/env.d.ts`):
    detecta automáticamente).
 2. Configura las environment variables `MERCANTIL_API_URL` y `MERCANTIL_API_KEY`
    (Settings → Environment Variables). La key queda solo en el servidor.
-3. Build (`npm run build`) y funciones serverless con `maxDuration: 60` ya
+3. Build (`pnpm build`) y funciones serverless con `maxDuration: 60` ya
    configurados en `astro.config.mjs`.
 4. Deploy. El sitio y las rutas `/api/mercantil/*` quedan en la misma función
    serverless.
