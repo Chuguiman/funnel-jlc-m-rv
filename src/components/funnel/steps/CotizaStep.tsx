@@ -638,6 +638,13 @@ export function CotizaStep({
     setSelections(next);
   };
 
+  const removeSelection = (selection: FPlanChoice) => {
+    setSelections((current) => current.filter((item) => item.productId !== selection.productId));
+    if (!selection.vehicle && selection.productId === interest) {
+      setInterest(selections.find((item) => !item.vehicle && item.productId !== selection.productId)?.productId ?? null);
+    }
+  };
+
   const total = selections.reduce((a, s) => a + s.totalPrime, 0);
   const selectedFrequency = PAYMENT_FREQUENCIES.find((item) => item.value === emitConfig.paymentFrequency) ?? PAYMENT_FREQUENCIES[3];
   const frequencyEquivalentTotal = total / selectedFrequency.per;
@@ -1351,6 +1358,15 @@ export function CotizaStep({
                         {selectedFrequency.per > 1 && <span className="font-extrabold text-amber-200">Anual: {formatMoney(s.totalPrime)}</span>}
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => removeSelection(s)}
+                      className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-300 transition hover:bg-rose-500/20 hover:text-rose-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300"
+                      aria-label={`Quitar ${s.productTitle} de mis productos`}
+                      title="Quitar producto"
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4"><path d="M4 7h16M10 11v6m4-6v6M9 7l1-2h4l1 2m-9 0 1 13h10l1-13" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    </button>
                   </li>
                 );
               })}
@@ -1386,6 +1402,7 @@ export function CotizaStep({
         frequency={selectedFrequency}
         canContinue={canContinue}
         onContinue={() => { setCartOpen(false); onNext(); }}
+        onRemove={removeSelection}
       />
       {formError && formErrorTarget && (
         <QuoteErrorDialog
@@ -1410,6 +1427,7 @@ function MobileCartSheet({
   frequency,
   canContinue,
   onContinue,
+  onRemove,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1417,6 +1435,7 @@ function MobileCartSheet({
   frequency: (typeof PAYMENT_FREQUENCIES)[number];
   canContinue: boolean;
   onContinue: () => void;
+  onRemove: (selection: FPlanChoice) => void;
 }) {
   if (!open) return null;
   const total = selections.reduce((sum, selection) => sum + selection.totalPrime, 0);
@@ -1448,7 +1467,7 @@ function MobileCartSheet({
             {selections.map((selection) => {
               const visual = selection.vehicle ? FALLBACK_PRODUCT_VISUAL : productVisual(selection.productId);
               return (
-                <li key={selection.productId} className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-slate-100 p-3">
+                <li key={selection.productId} className="grid grid-cols-[2.25rem_minmax(0,1fr)_auto_2rem] items-center gap-3 rounded-xl border border-slate-100 p-3">
                   <span className={clsx('flex h-9 w-9 items-center justify-center rounded-full', visual.active)}>{selection.vehicle ? '🚗' : <ProductIcon icon={visual.icon} className="h-4 w-4" />}</span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold text-slate-900">{selection.productTitle}</span>
@@ -1459,6 +1478,15 @@ function MobileCartSheet({
                     <span className="block text-base font-extrabold text-brand-700">{formatMoney(selection.totalPrime / frequency.per)}</span>
                     {frequency.per > 1 && <span className="block text-[10px] font-extrabold text-amber-700">Anual: {formatMoney(selection.totalPrime)}</span>}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemove(selection)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                    aria-label={`Quitar ${selection.productTitle} de mis productos`}
+                    title="Quitar producto"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4"><path d="M4 7h16M10 11v6m4-6v6M9 7l1-2h4l1 2m-9 0 1 13h10l1-13" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
                 </li>
               );
             })}
