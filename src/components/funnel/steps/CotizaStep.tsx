@@ -1776,6 +1776,9 @@ function AutoPlanCard({
   const plans = product.plans ?? [];
   const label = /plus|elite/i.test(product.title ?? '') ? 'Plus' : /b[aá]sic/i.test(product.title ?? '') ? 'Básica' : 'Auto';
   const recommended = label === 'Plus';
+  const description = recommended
+    ? 'Adquiérela con asistencia en viajes a nivel nacional, defensa legal, atención en emergencias viales y servicio de grúa.'
+    : product.description || 'Consulta las condiciones disponibles para esta cobertura.';
 
   return (
     <article className={clsx(
@@ -1788,7 +1791,7 @@ function AutoPlanCard({
         <h4 className="font-display mt-1 break-words text-xl font-extrabold leading-tight text-slate-900">{product.title}</h4>
       </div>
       <p className="mt-3 min-h-10 break-words text-sm leading-relaxed text-slate-600">
-        {product.description || 'Consulta las condiciones disponibles para esta cobertura.'}
+        {description}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
