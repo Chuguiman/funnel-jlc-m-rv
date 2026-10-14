@@ -2,7 +2,6 @@
  * Lectura server-side de una emisión en Mercantil con el formato que espera el admin de JLC.
  * La usan la sincronización al emitir y la conciliación de pagos que dispara el admin.
  */
-import { timingSafeEqual } from 'node:crypto';
 import { mercantilFetch } from './mercantil';
 import type { CartSummary, CartSummaryPolicy, EmitPolicyStatus, EmitStatus } from './types';
 
@@ -83,7 +82,11 @@ export async function readEmission(cartId: string): Promise<AdminEmissionState |
 export function adminAuthorized(header: string | null): boolean {
   const secret = (import.meta.env.ADMIN_SYNC_SECRET as string | undefined)?.trim() ?? '';
   if (!secret || !header?.startsWith('Bearer ')) return false;
-  const received = Buffer.from(header.slice(7));
-  const expected = Buffer.from(secret);
-  return received.length === expected.length && timingSafeEqual(received, expected);
+  const received = new TextEncoder().encode(header.slice(7));
+  const expected = new TextEncoder().encode(secret);
+  if (received.length !== expected.length) return false;
+  // Comparación en tiempo constante.
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= received[i] ^ expected[i];
+  return diff === 0;
 }
