@@ -244,9 +244,9 @@ export function EmiteStep(props: EmiteStepProps) {
       gender: props.identity.genderId || undefined,
       email: props.identity.email.trim() || undefined,
       phone: [props.identity.phonePrefix, props.identity.areaCode, props.identity.phoneNumber].filter(Boolean).join('') || undefined,
-      address: needsComplete ? adminSyncAddress() : undefined,
+      address: adminSyncAddress(),
     },
-  }), [adminSyncAddress, needsComplete, props.client.clientId, props.complete.firstName, props.complete.lastName, props.identity]);
+  }), [adminSyncAddress, props.client.clientId, props.complete.firstName, props.complete.lastName, props.identity]);
 
   const syncEmissionToAdmin = useCallback((cartId: string, clientId?: string) => {
     void api.syncAdminEmission(adminSyncPayload(cartId, clientId)).catch((syncError) => {

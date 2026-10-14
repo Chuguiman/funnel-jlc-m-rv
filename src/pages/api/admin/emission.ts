@@ -30,6 +30,8 @@ export const POST: APIRoute = async ({ request }) => {
   const payload = {
     shopcartId: input.cartId,
     mercantilClientId: input.customer.mercantilClientId,
+    // Cada funnel es una campaña del admin: define origen de cartera y ejecutivo.
+    campaignCode: import.meta.env.ADMIN_CAMPAIGN_CODE?.trim() || undefined,
     status: emission.status,
     paymentFrequency: emission.paymentFrequency,
     customer: input.customer,

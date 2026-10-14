@@ -5,17 +5,32 @@
 import { mercantilFetch } from './mercantil';
 import type { CartSummary, CartSummaryPolicy, EmitPolicyStatus, EmitStatus } from './types';
 
+export type AdminQuote = {
+  receipt: string | null;
+  amount: number | null;
+  dueDate: string | null;
+  isPaid: boolean;
+};
+
 export type AdminPolicy = {
   id: string;
+  /** Número completo de Mercantil (entidad-ramo-póliza, ej. 1-50-230289): así lo guarda el admin y así llegan las liquidaciones. */
   policyNumber: string;
   certificateNumber: string;
   receiptNumber: string;
+  /** Ramo comercial de Mercantil (Vida, Accidentes Personales…); el funnel solo distingue la categoría. */
   product: string;
   category: string;
   paymentFrequency: string;
+  /** Prima de cada cuota sin IGTF (lo que el admin guarda como `prima`). */
+  installmentPremium: number;
+  installments: number;
   annualPremium: number;
   assuredSum: number;
   currency: string;
+  startDate: string | null;
+  endDate: string | null;
+  quotes: AdminQuote[];
   isPaid: boolean;
 };
 
@@ -32,28 +47,42 @@ function normalizeFrequency(value?: string) {
 }
 
 function policyMatch(policy: EmitPolicyStatus, summary: CartSummary) {
-  const details = policy.policyPaymentData;
-  const number = String(details?.nu_poliza ?? '');
-  const certificate = String(details?.certificateNumber ?? '');
-  return summary.policies?.find((item) =>
-    item.id === policy.id || item.policyNumber === number || item.contractNumber === number || item.certificateNumber === certificate,
-  );
+  const items = summary.policies ?? [];
+  const number = String(policy.policyPaymentData?.nu_poliza ?? '');
+  // Por id; si no, por número. Nunca por certificado: todas las pólizas individuales tienen el certificado 1.
+  return items.find((item) => item.id === policy.id)
+    ?? (number ? items.find((item) => item.policyNumber === number || item.contractNumber === number) : undefined);
 }
 
 function serializePolicy(policy: EmitPolicyStatus, summaryItem: CartSummaryPolicy | undefined, frequency: string): AdminPolicy {
   const details = policy.policyPaymentData;
-  const quote = summaryItem?.paymentQuotes?.find((item) => item.isNextDuePayment) ?? summaryItem?.paymentQuotes?.[0];
+  const quotes = summaryItem?.paymentQuotes ?? [];
+  const quote = quotes.find((item) => item.isNextDuePayment) ?? quotes[0];
+  const shortNumber = String(details?.nu_poliza ?? summaryItem?.policyNumber ?? summaryItem?.contractNumber ?? '');
+  const entity = summaryItem?.entity ?? details?.cd_entidad;
+  const area = summaryItem?.area ?? details?.cd_area;
+  const fullNumber = summaryItem?.number ?? (entity != null && area != null && shortNumber ? `${entity}-${area}-${shortNumber}` : shortNumber);
   return {
     id: policy.id,
-    policyNumber: String(details?.nu_poliza ?? summaryItem?.policyNumber ?? summaryItem?.contractNumber ?? ''),
+    policyNumber: fullNumber,
     certificateNumber: String(details?.certificateNumber ?? summaryItem?.certificateNumber ?? ''),
     receiptNumber: String(details?.recibo?.cd_recibo ?? quote?.receipt ?? ''),
-    product: policy.product || summaryItem?.title || 'Póliza Mercantil',
+    product: summaryItem?.title || policy.product || 'Póliza Mercantil',
     category: policy.category,
     paymentFrequency: frequency,
+    installmentPremium: summaryItem?.quotedAmount ?? 0,
+    installments: quotes.length,
     annualPremium: summaryItem?.annualPremium ?? 0,
     assuredSum: summaryItem?.assuredSum ?? 0,
     currency: 'USD',
+    startDate: summaryItem?.startDate ?? null,
+    endDate: summaryItem?.endDate ?? null,
+    quotes: quotes.map((item) => ({
+      receipt: item.receipt ?? null,
+      amount: item.amount ?? null,
+      dueDate: item.expirationDate ?? null,
+      isPaid: item.isPaid === true,
+    })),
     isPaid: policy.isPaid === true || quote?.isPaid === true,
   };
 }
