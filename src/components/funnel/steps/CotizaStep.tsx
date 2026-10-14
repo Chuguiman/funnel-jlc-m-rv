@@ -728,7 +728,7 @@ export function CotizaStep({
         ].map((gender) => (
           <button key={gender.value} type="button" onClick={() => { setIdentityField('genderId', gender.value); setVitalGenderAnswered(true); }} className={clsx('group overflow-hidden rounded-3xl border text-center shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg', gender.tone)}>
             <span className="block h-40 overflow-hidden bg-white sm:h-44">
-              <img src={gender.value === 'M' ? '/choice-man-real.png' : '/choice-woman-real.png'} alt="" className="h-full w-full object-cover object-[center_20%] transition duration-300 group-hover:scale-105" />
+              <img src={gender.value === 'M' ? '/choice-man-real.webp' : '/choice-woman-real.webp'} alt="" fetchPriority="high" decoding="async" className="h-full w-full object-cover object-[center_20%] transition duration-300 group-hover:scale-105" />
             </span>
             <span className="block px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
               <span className="block text-xl font-bold">{gender.label}</span>
@@ -743,9 +743,9 @@ export function CotizaStep({
 
   if (route === 'auto' && !vehicleCategory) {
     const choices = [
-      { value: 'car' as const, label: 'Carro', description: 'Particular o familiar', image: '/vehicle-car-real.png' },
-      { value: 'motorcycle' as const, label: 'Moto', description: 'Dos ruedas', image: '/vehicle-motorcycle-real.png' },
-      { value: 'truck' as const, label: 'Carga', description: 'Camión o trabajo', image: '/vehicle-cargo-real.png' },
+      { value: 'car' as const, label: 'Carro', description: 'Particular o familiar', image: '/vehicle-car-real.webp' },
+      { value: 'motorcycle' as const, label: 'Moto', description: 'Dos ruedas', image: '/vehicle-motorcycle-real.webp' },
+      { value: 'truck' as const, label: 'Carga', description: 'Camión o trabajo', image: '/vehicle-cargo-real.webp' },
     ];
     return <div id="cotiza" className="mx-auto max-w-2xl py-3 sm:py-8">
       <h2 className="font-display mt-2 text-center text-3xl font-bold text-brand-900">¿Qué vehículo quieres proteger?</h2>
@@ -755,7 +755,7 @@ export function CotizaStep({
         {choices.map((choice) => (
           <button key={choice.value} type="button" onClick={() => setVehicleCategory(choice.value)} className="group overflow-hidden rounded-3xl border border-brand-100 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand-400 hover:shadow-lg">
             <span className="block h-36 overflow-hidden bg-brand-50">
-              <img src={choice.image} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+              <img src={choice.image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
             </span>
             <span className="block p-4">
               <span className="block text-lg font-bold text-brand-900">{choice.label}</span>
@@ -802,7 +802,7 @@ export function CotizaStep({
       {!route ? <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <button type="button" className="group flex flex-col overflow-hidden rounded-2xl border border-brand-200 bg-white p-0 text-left leading-none transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-lg hover:shadow-brand-900/10" onClick={() => { setVehicleCategory(null); setEmitConfig((current) => ({ ...current, paymentFrequency: 'yearly' })); setRoute('auto'); }}>
           <span className="block h-40 overflow-hidden bg-brand-100 sm:h-44">
-            <img src="/auto-real-photo.png" alt="Conductora junto a su vehículo" width="1536" height="1024" className="h-full w-full object-cover object-[center_62%] transition duration-300 group-hover:scale-105" />
+            <img src="/auto-real-photo.webp" alt="Conductora junto a su vehículo" width="960" height="640" loading="lazy" decoding="async" className="h-full w-full object-cover object-[center_62%] transition duration-300 group-hover:scale-105" />
           </span>
           <span className="block p-5 sm:p-6">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-600">Mi vehículo</span>
@@ -812,12 +812,12 @@ export function CotizaStep({
         </button>
         <button type="button" className="group flex flex-col overflow-hidden rounded-2xl border border-brand-200 bg-white p-0 text-left leading-none transition hover:-translate-y-0.5 hover:border-brand-500 hover:shadow-lg hover:shadow-brand-900/10" onClick={() => { setInterest(null); setVitalGenderAnswered(false); setRoute('vital'); }}>
           <span className="block h-40 overflow-hidden bg-brand-100 sm:h-44">
-            <img src="/vital-real-photo.png" alt="Pareja disfrutando de tranquilidad en casa" width="1536" height="1024" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+            <img src="/vital-real-photo.webp" alt="Pareja disfrutando de tranquilidad en casa" width="960" height="640" loading="lazy" decoding="async" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
           </span>
           <span className="block p-5 sm:p-6">
             <span className="text-xs font-bold uppercase tracking-widest text-brand-600">Mi tranquilidad</span>
             <span className="mt-3 flex items-center gap-2 text-2xl font-bold leading-none text-brand-900">Protección Vital <ForwardIcon /></span>
-            <span className="mt-2 block text-sm text-slate-600">Vida, accidentes, funerario, hospitalización o cáncer.</span>
+            <span className="mt-2 block text-sm text-slate-600">Vida, accidentes, funerario, renta por hospitalización o cáncer.</span>
           </span>
         </button>
       </div> : <>
