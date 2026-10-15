@@ -1,5 +1,6 @@
-import type { APIRoute } from 'astro';
+import type { APIContext, APIRoute } from 'astro';
 import { mercantilFetch, mercantilPdf } from '../../../lib/mercantil';
+import { canAccessCart, cartAccessConfigured, grantCartAccess } from '../../../lib/cart-access';
 
 /**
  * Proxy inverso hacia la API de Aliados de Mercantil.
@@ -68,7 +69,22 @@ function isSameOrigin(request: Request): boolean {
   return false;
 }
 
-async function handle(method: string, params: Record<string, string | undefined>, request: Request) {
+function cartIdFromPath(path: string, request: Request): string | null {
+  const match = path.match(/^shopcarts\/([^/]+)\/(?:summary|products|emit|policies\/[^/]+\/pdf|vehicle-property-title)$/);
+  if (match) return match[1];
+  if (path === 'auto-products/vehicles/complete-vehicle-info' || path === 'shopcarts/errors') {
+    return new URL(request.url).searchParams.get('shopcartId');
+  }
+  return null;
+}
+
+function createdCartId(body: unknown): string | null {
+  if (!body || typeof body !== 'object') return null;
+  const id = (body as { id?: unknown }).id;
+  return typeof id === 'string' && id.length > 0 ? id : null;
+}
+
+async function handle(method: string, params: Record<string, string | undefined>, request: Request, cookies: APIContext['cookies']) {
   const raw = params.path;
   const path = Array.isArray(raw) ? raw.join('/') : (raw ?? '');
 
@@ -80,6 +96,14 @@ async function handle(method: string, params: Record<string, string | undefined>
   }
   if (method !== 'GET' && method !== 'HEAD' && !isSameOrigin(request)) {
     return json(403, { message: 'Origen no permitido: las peticiones que modifican datos deben venir del funnel.' });
+  }
+  if (method === 'POST' && path === 'shopcarts' && !cartAccessConfigured()) {
+    return json(503, { message: 'La protección de carritos no está configurada en el servidor.' });
+  }
+
+  const cartId = cartIdFromPath(path, request);
+  if (cartId && !(await canAccessCart(cookies, cartId))) {
+    return json(403, { message: 'No tienes acceso a este carrito desde este navegador.' });
   }
 
   // Descarga de PDF: Mercantil responde JSON { pdfName, pdfBase64 } → se decodifica y se sirve binario
@@ -136,6 +160,12 @@ async function handle(method: string, params: Record<string, string | undefined>
     body,
     rawBody !== undefined ? { rawBody, contentType } : undefined,
   );
+  if (method === 'POST' && path === 'shopcarts' && result.status >= 200 && result.status < 300) {
+    const cartId = createdCartId(result.body);
+    if (!cartId || !(await grantCartAccess(cookies, cartId))) {
+      return json(503, { message: 'No fue posible asegurar el acceso a tu carrito. Reintenta crear la solicitud.' });
+    }
+  }
   return json(result.status, result.body);
 }
 
@@ -149,7 +179,7 @@ function json(status: number, body: unknown): Response {
   });
 }
 
-export const GET: APIRoute = (ctx) => handle('GET', ctx.params, ctx.request);
-export const POST: APIRoute = (ctx) => handle('POST', ctx.params, ctx.request);
-export const PUT: APIRoute = (ctx) => handle('PUT', ctx.params, ctx.request);
-export const DELETE: APIRoute = (ctx) => handle('DELETE', ctx.params, ctx.request);
+export const GET: APIRoute = (ctx) => handle('GET', ctx.params, ctx.request, ctx.cookies);
+export const POST: APIRoute = (ctx) => handle('POST', ctx.params, ctx.request, ctx.cookies);
+export const PUT: APIRoute = (ctx) => handle('PUT', ctx.params, ctx.request, ctx.cookies);
+export const DELETE: APIRoute = (ctx) => handle('DELETE', ctx.params, ctx.request, ctx.cookies);

@@ -15,6 +15,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_APP_URL: string;
   readonly ADMIN_SYNC_URL: string;
   readonly ADMIN_SYNC_SECRET: string;
+  readonly CART_ACCESS_SECRET: string;
 }
 
 interface ImportMeta {
